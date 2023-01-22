@@ -3,6 +3,7 @@ import pyautogui
 import time
 import os
 from win32api import GetSystemMetrics
+from winotify import Notification
 
 
 # Treshold for cv2
@@ -15,6 +16,12 @@ MONITOR_HEIGHT = GetSystemMetrics(1)
 
 # Time to wait between cycles in seconds
 TIME_TO_WAIT = 1620
+
+# Notification popup in tray 
+notification = Notification(app_id="HS bot",
+                            title="Next battle begins",
+                            msg="Please open Hearthstone window.",
+                            duration="short")
 
 
 def get_target_values(target_img_path: str, enemy=False) -> tuple:
@@ -156,6 +163,8 @@ def waiting_cycle() -> None:
     for countdown in range (int(TIME_TO_WAIT / 60), 0, -1):
         print(f'Time until the battle: {countdown} mins.')
         time.sleep(60)
+    
+    notification.show()
 
 
 def start_bot():
