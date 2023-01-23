@@ -4,6 +4,7 @@ import time
 import os
 from win32api import GetSystemMetrics
 from winotify import Notification, audio
+import threading as th
 
 
 # Treshold for cv2
@@ -16,6 +17,9 @@ MONITOR_HEIGHT = GetSystemMetrics(1)
 
 # Time to wait between cycles in seconds
 TIME_TO_WAIT = 1620
+
+# Continue or stop the waiting cycle
+continue_waiting = True
 
 # Notification popup in tray 
 notification = Notification(app_id="HS bot",
@@ -129,7 +133,7 @@ def find_the_target(target_img_path, treasure_item=False) -> bool:
 def battle_sequence() -> None:
     """
     Finds enemy icons and presses hero abilities
-    until sees a victory screen
+    until the victory screen appears
     """
     win = False
     while not win:
@@ -157,15 +161,33 @@ def battle_sequence() -> None:
             win = True
     
 
+def key_capture_thread():
+    """
+    This thread is looking for enter key
+    to stop the waiting cycle
+    """
+    global continue_waiting
+    input()
+    continue_waiting = False
+
+
 def waiting_cycle() -> None:
     """
     Waits for the max amount of exp
+    Uses another thread to read enter key
+    to break the cycle
     """
-    for countdown in range (int(TIME_TO_WAIT / 60), 0, -1):
-        print(f'Time until the battle: {countdown} mins.')
-        time.sleep(60)
+    global continue_waiting
+    th.Thread(target=key_capture_thread, args=(), name='key_capture_thread', daemon=True).start()
+    countdown = TIME_TO_WAIT
+    while countdown != 0 and continue_waiting:
+        if countdown % 60 == 0:
+            print(f'Time until the battle: {countdown / 60} mins.')
+        time.sleep(1)
+        countdown -= 1
     
     notification.show()
+    continue_waiting = True
 
 
 def start_bot():
