@@ -153,7 +153,7 @@ def battle_sequence() -> None:
             # Press enemy icon
             press_button('data/enemy.jpg', enemy=True)
             time.sleep(1)
-            pyautogui.move(0, -100)
+            pyautogui.move(0, -200)
             time.sleep(2)
 
         # Start the battle
