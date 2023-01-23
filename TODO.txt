@@ -1,0 +1,2 @@
+- Make an option to push a button to start the battle immediately
+- Create a telegram bot to send error messages from a HS bot
