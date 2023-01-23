@@ -3,7 +3,7 @@ import pyautogui
 import time
 import os
 from win32api import GetSystemMetrics
-from winotify import Notification
+from winotify import Notification, audio
 
 
 # Treshold for cv2
@@ -22,6 +22,7 @@ notification = Notification(app_id="HS bot",
                             title="Next battle begins",
                             msg="Please open Hearthstone window.",
                             duration="short")
+notification.set_audio(audio.Mail, loop=False)
 
 
 def get_target_values(target_img_path: str, enemy=False) -> tuple:
