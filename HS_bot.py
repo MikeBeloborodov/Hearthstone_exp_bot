@@ -34,13 +34,13 @@ def get_target_values(target_img_path: str, enemy=False) -> tuple:
     """
     if enemy:
         pyautogui.screenshot(
-            'current.jpg', 
+            'data/current.jpg', 
             region=(0, 0, MONITOR_WIDTH, int(MONITOR_HEIGHT / 2.5) )
         )
     else:
-        pyautogui.screenshot('current.jpg')
+        pyautogui.screenshot('data/current.jpg')
 
-    haystack = cv.imread('current.jpg')
+    haystack = cv.imread('data/current.jpg')
     needle = cv.imread(target_img_path)
 
     result = cv.matchTemplate(haystack, needle, cv.TM_CCOEFF_NORMED)
@@ -51,7 +51,7 @@ def get_target_values(target_img_path: str, enemy=False) -> tuple:
     target_x = max_loc[0] + int(needle.shape[1] / 2)
 
     # Clean up and remove a screenshot
-    os.remove('current.jpg')
+    os.remove('data/current.jpg')
 
     return (target_x, target_y, max_val)
 
@@ -75,8 +75,8 @@ def wait_for_target(target_img_path, click=False, treasure_item=False) -> bool:
     found = False
     max_tries = 0 
     while not found and max_tries < 300:
-        pyautogui.screenshot('current.jpg')
-        haystack = cv.imread('current.jpg')
+        pyautogui.screenshot('data/current.jpg')
+        haystack = cv.imread('data/current.jpg')
         needle = cv.imread(target_img_path)
 
         result = cv.matchTemplate(haystack, needle, cv.TM_CCOEFF_NORMED)
@@ -107,8 +107,8 @@ def find_the_target(target_img_path, treasure_item=False) -> bool:
     """
     Checks if target is on the screen.
     """
-    pyautogui.screenshot('current.jpg')
-    haystack = cv.imread('current.jpg')
+    pyautogui.screenshot('data/current.jpg')
+    haystack = cv.imread('data/current.jpg')
     needle = cv.imread(target_img_path)
 
     result = cv.matchTemplate(haystack, needle, cv.TM_CCOEFF_NORMED)
@@ -135,24 +135,24 @@ def battle_sequence() -> None:
     while not win:
         for counter in range(0,3):
             # Press hero ability button
-            press_button('ability_icon.jpg')
+            press_button('data/ability_icon.jpg')
             time.sleep(1)
 
             # Press enemy icon
-            press_button('enemy.jpg', enemy=True)
+            press_button('data/enemy.jpg', enemy=True)
             time.sleep(1)
             pyautogui.move(0, -100)
             time.sleep(2)
 
         # Start the battle
-        press_button('fight_button.jpg')
+        press_button('data/fight_button.jpg')
         for countdown in range(0, 25):
-            if find_the_target('victory_emblem.jpg'):
+            if find_the_target('data/victory_emblem.jpg'):
                 break
             time.sleep(1)
 
         # Check if won the battle
-        confidence = get_target_values('victory_emblem.jpg')[2]
+        confidence = get_target_values('data/victory_emblem.jpg')[2]
         if confidence >= CONFIDENCE_TRESHOLD:
             win = True
     
@@ -180,28 +180,28 @@ def start_bot():
         print(f'Game {games_counter} started.')
 
         # Location choice
-        wait_for_target('location_choice_button.jpg', click=True)
+        wait_for_target('data/location_choice_button.jpg', click=True)
 
         # Party choice
-        wait_for_target('party_choice_button.jpg', click=True)
+        wait_for_target('data/party_choice_button.jpg', click=True)
 
         # Play button
-        wait_for_target('play_button.jpg', click=True)
+        wait_for_target('data/play_button.jpg', click=True)
 
         # Cards choice yellow button
-        wait_for_target('yellow_button_pre_battle.jpg', click=True)
+        wait_for_target('data/yellow_button_pre_battle.jpg', click=True)
 
         # Wait for max exp
         waiting_cycle()
 
         # Fight
-        if wait_for_target('ability_icon.jpg'):
+        if wait_for_target('data/ability_icon.jpg'):
             battle_sequence()
             time.sleep(2)
 
         # Click trough prizes
         max_tries = 0
-        while not find_the_target('treasure_item.jpg', treasure_item=True):
+        while not find_the_target('data/treasure_item.jpg', treasure_item=True):
             pyautogui.click()
             time.sleep(1)
             max_tries += 1
@@ -210,22 +210,22 @@ def start_bot():
                 raise
 
         # Click on the treasure icon
-        wait_for_target('treasure_item.jpg', click=True, treasure_item=True)
+        wait_for_target('data/treasure_item.jpg', click=True, treasure_item=True)
 
         # Click on the take treasure button
-        wait_for_target('take_treasure_button.jpg', click=True)
+        wait_for_target('data/take_treasure_button.jpg', click=True)
 
         # Click on the view party button
-        wait_for_target('view_party_button.jpg', click=True)
+        wait_for_target('data/view_party_button.jpg', click=True)
 
         # Click on the retire button
-        wait_for_target('retire_button.jpg', click=True)
+        wait_for_target('data/retire_button.jpg', click=True)
 
         # Click on the retire confirm button
-        wait_for_target('retire_confirm_button.jpg', click=True)
+        wait_for_target('data/retire_confirm_button.jpg', click=True)
 
         max_tries = 0
-        while not find_the_target('location_choice_button.jpg'):
+        while not find_the_target('data/location_choice_button.jpg'):
             pyautogui.click(MONITOR_WIDTH / 2, MONITOR_HEIGHT / 2)
             time.sleep(1)
             max_tries += 1
