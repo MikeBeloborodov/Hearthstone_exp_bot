@@ -5,7 +5,14 @@ from win32api import GetSystemMetrics
 from winotify import Notification, audio
 import threading as th
 import numpy as np
+import os
+from dotenv import load_dotenv
+import asyncio
+import telegram
 
+
+# load env variables
+load_dotenv()
 
 # Treshold for cv2
 CONFIDENCE_TRESHOLD = 0.7
@@ -198,74 +205,85 @@ def waiting_cycle() -> None:
     continue_waiting = True
 
 
-def start_bot():
+async def start_bot():
     """
     Main loop
     """
+    
+    # Telegram bot for error messages
+    telegram_bot = telegram.Bot(os.environ["BOT_TOKEN"])
     games_counter = 1
-    while True:
+    try:
+        while True:
 
-        time.sleep(3) # Time to switch to HS screen
+            time.sleep(3) # Time to switch to HS screen
 
-        print(f'Game {games_counter} started.')
+            print(f'Game {games_counter} started.')
 
-        # Location choice
-        wait_for_target('data/location_choice_button.jpg', click=True)
+            # Location choice
+            wait_for_target('data/location_choice_button.jpg', click=True)
 
-        # Party choice
-        wait_for_target('data/party_choice_button.jpg', click=True)
+            # Party choice
+            wait_for_target('data/party_choice_button.jpg', click=True)
 
-        # Play button
-        wait_for_target('data/play_button.jpg', click=True)
+            # Play button
+            wait_for_target('data/play_button.jpg', click=True)
 
-        # Cards choice yellow button
-        wait_for_target('data/yellow_button_pre_battle.jpg', click=True)
+            # Cards choice yellow button
+            wait_for_target('data/yellow_button_pre_battle.jpg', click=True)
 
-        # Wait for max exp
-        waiting_cycle()
+            # Wait for max exp
+            waiting_cycle()
 
-        # Fight
-        if wait_for_target('data/ability_icon.jpg'):
-            battle_sequence()
-            time.sleep(2)
+            # Fight
+            if wait_for_target('data/ability_icon.jpg'):
+                battle_sequence()
+                time.sleep(2)
 
-        # Click trough prizes
-        max_tries = 0
-        while not find_the_target('data/treasure_item.jpg', treasure_item=True):
-            pyautogui.click()
-            time.sleep(1)
-            max_tries += 1
-            if max_tries >= 300:
-                print("Error. Max tries reached while trying to find treasure_item.jpg")
-                raise
+            # Click trough prizes
+            max_tries = 0
+            while not find_the_target('data/treasure_item.jpg', treasure_item=True):
+                pyautogui.click()
+                time.sleep(1)
+                max_tries += 1
+                if max_tries >= 300:
+                    print("Error. Max tries reached while trying to find treasure_item.jpg")
+                    raise
 
-        # Click on the treasure icon
-        wait_for_target('data/treasure_item.jpg', click=True, treasure_item=True)
+            # Click on the treasure icon
+            wait_for_target('data/treasure_item.jpg', click=True, treasure_item=True)
 
-        # Click on the take treasure button
-        wait_for_target('data/take_treasure_button.jpg', click=True)
+            # Click on the take treasure button
+            wait_for_target('data/take_treasure_button.jpg', click=True)
 
-        # Click on the view party button
-        wait_for_target('data/view_party_button.jpg', click=True)
+            # Click on the view party button
+            wait_for_target('data/view_party_button.jpg', click=True)
 
-        # Click on the retire button
-        wait_for_target('data/retire_button.jpg', click=True)
+            # Click on the retire button
+            wait_for_target('data/retire_button.jpg', click=True)
 
-        # Click on the retire confirm button
-        wait_for_target('data/retire_confirm_button.jpg', click=True)
+            # Click on the retire confirm button
+            wait_for_target('data/retire_confirm_button.jpg', click=True)
 
-        max_tries = 0
-        while not find_the_target('data/location_choice_button.jpg'):
-            pyautogui.click(MONITOR_WIDTH / 2, MONITOR_HEIGHT / 2)
-            time.sleep(1)
-            max_tries += 1
-            if max_tries > 300:
-                print("Error. Max tries reached while trying to find location_choice_button.jpg")
-                raise
-        
-        print(f'Game {games_counter} ended.')
-        games_counter += 1
+            max_tries = 0
+            while not find_the_target('data/location_choice_button.jpg'):
+                pyautogui.click(MONITOR_WIDTH / 2, MONITOR_HEIGHT / 2)
+                time.sleep(1)
+                max_tries += 1
+                if max_tries > 300:
+                    print("Error. Max tries reached while trying to find location_choice_button.jpg")
+                    raise
+            
+            print(f'Game {games_counter} ended.')
+            games_counter += 1
+    except Exception as error:
+        print(error)
+        async with telegram_bot:
+            await telegram_bot.send_message(
+                text=f'Error with bot during the game №{games_counter}.',
+                chat_id=os.environ["MASTER_CHAT_ID"])
+        raise
 
 
 if __name__ == '__main__':
-    start_bot()
+    asyncio.run(start_bot())
