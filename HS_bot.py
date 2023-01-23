@@ -1,10 +1,10 @@
 import cv2 as cv
 import pyautogui
 import time
-import os
 from win32api import GetSystemMetrics
 from winotify import Notification, audio
 import threading as th
+import numpy as np
 
 
 # Treshold for cv2
@@ -37,14 +37,19 @@ def get_target_values(target_img_path: str, enemy=False) -> tuple:
     to fit only enemies.
     """
     if enemy:
-        pyautogui.screenshot(
-            'data/current.jpg', 
+        screenshot = pyautogui.screenshot( 
             region=(0, 0, MONITOR_WIDTH, int(MONITOR_HEIGHT / 2.5) )
         )
+        open_cv_image = np.array(screenshot)
+        # Convert RGB to BGR 
+        open_cv_image = open_cv_image[:, :, ::-1].copy()
     else:
-        pyautogui.screenshot('data/current.jpg')
+        screenshot = pyautogui.screenshot()
+        open_cv_image = np.array(screenshot)
+        # Convert RGB to BGR 
+        open_cv_image = open_cv_image[:, :, ::-1].copy()
 
-    haystack = cv.imread('data/current.jpg')
+    haystack = open_cv_image
     needle = cv.imread(target_img_path)
 
     result = cv.matchTemplate(haystack, needle, cv.TM_CCOEFF_NORMED)
@@ -53,9 +58,6 @@ def get_target_values(target_img_path: str, enemy=False) -> tuple:
 
     target_y = max_loc[1] + int(needle.shape[0] / 2)
     target_x = max_loc[0] + int(needle.shape[1] / 2)
-
-    # Clean up and remove a screenshot
-    os.remove('data/current.jpg')
 
     return (target_x, target_y, max_val)
 
@@ -79,8 +81,11 @@ def wait_for_target(target_img_path, click=False, treasure_item=False) -> bool:
     found = False
     max_tries = 0 
     while not found and max_tries < 300:
-        pyautogui.screenshot('data/current.jpg')
-        haystack = cv.imread('data/current.jpg')
+        screenshot = pyautogui.screenshot()
+        open_cv_image = np.array(screenshot)
+        # Convert RGB to BGR 
+        open_cv_image = open_cv_image[:, :, ::-1].copy()
+        haystack = open_cv_image
         needle = cv.imread(target_img_path)
 
         result = cv.matchTemplate(haystack, needle, cv.TM_CCOEFF_NORMED)
@@ -111,8 +116,11 @@ def find_the_target(target_img_path, treasure_item=False) -> bool:
     """
     Checks if target is on the screen.
     """
-    pyautogui.screenshot('data/current.jpg')
-    haystack = cv.imread('data/current.jpg')
+    screenshot = pyautogui.screenshot()
+    open_cv_image = np.array(screenshot)
+    # Convert RGB to BGR 
+    open_cv_image = open_cv_image[:, :, ::-1].copy()
+    haystack = open_cv_image
     needle = cv.imread(target_img_path)
 
     result = cv.matchTemplate(haystack, needle, cv.TM_CCOEFF_NORMED)
@@ -182,7 +190,7 @@ def waiting_cycle() -> None:
     countdown = TIME_TO_WAIT
     while countdown != 0 and continue_waiting:
         if countdown % 60 == 0:
-            print(f'Time until the battle: {countdown / 60} mins.')
+            print(f'Time until the battle: {int(countdown / 60)} mins.')
         time.sleep(1)
         countdown -= 1
     

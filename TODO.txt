@@ -1,4 +1,4 @@
 - (Done) Make an option to push a button to start the battle immediately
 - Create a telegram bot to send error messages from a HS bot
 - (Done) Make a better file system for screenshots and pictures
-- Change current.jpg type of interaction to a python object
+- (Done) Change current.jpg type of interaction to a python object
