@@ -10,7 +10,18 @@ from dotenv import load_dotenv
 import asyncio
 import telegram
 import datetime
+import argparse
 
+# Parses arguments
+# -t option sends a telegram notification when the battle starts
+parser = argparse.ArgumentParser(description="Hearthstone exp farming bot.")
+parser.add_argument(
+    "-t",
+    "--telegram_notification",
+    help="Sends a telegram notification when the battle starts.",
+    action="store_true"
+    )
+args = parser.parse_args()
 
 # load env variables
 load_dotenv()
@@ -187,13 +198,14 @@ def key_capture_thread():
     continue_waiting = False
 
 
-def waiting_cycle() -> None:
+async def waiting_cycle() -> None:
     """
     Waits for the max amount of exp
     Uses another thread to read enter key
     to break the cycle
     """
     global continue_waiting
+    global args
     th.Thread(target=key_capture_thread, args=(), name='key_capture_thread', daemon=True).start()
     countdown = TIME_TO_WAIT
     while countdown != 0 and continue_waiting:
@@ -202,7 +214,16 @@ def waiting_cycle() -> None:
         time.sleep(1)
         countdown -= 1
     
+    # desktop notification
     notification.show()
+    # if -t option was used sends a telegram notification
+    if args.telegram_notification:
+        telegram_bot = telegram.Bot(os.environ["BOT_TOKEN"])
+        async with telegram_bot:
+            await telegram_bot.send_message(
+                text=f'Battle starts!',
+                chat_id=os.environ["MASTER_CHAT_ID"])
+        
     continue_waiting = True
 
 
@@ -235,7 +256,7 @@ async def start_bot():
             wait_for_target('data/yellow_button_pre_battle.jpg', click=True)
 
             # Wait for max exp
-            waiting_cycle()
+            await waiting_cycle()
 
             # Fight
             if wait_for_target('data/ability_icon.jpg'):
