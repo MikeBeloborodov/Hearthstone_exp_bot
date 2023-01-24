@@ -9,6 +9,7 @@ import os
 from dotenv import load_dotenv
 import asyncio
 import telegram
+import datetime
 
 
 # load env variables
@@ -212,6 +213,7 @@ async def start_bot():
     
     # Telegram bot for error messages
     telegram_bot = telegram.Bot(os.environ["BOT_TOKEN"])
+    
     games_counter = 1
     try:
         while True:
@@ -277,11 +279,19 @@ async def start_bot():
             print(f'Game {games_counter} ended.')
             games_counter += 1
     except Exception as error:
+        # saves error screenshot
+        screenshot_path = 'errors/' + str(datetime.datetime.now())[:-7].replace(':', '.') + '.jpg'
+        pyautogui.screenshot(screenshot_path)
         print(error)
+
+        # sends message to the telegram using a bot
         async with telegram_bot:
             await telegram_bot.send_message(
-                text=f'Error with bot during the game №{games_counter}.',
+                text=f'Error with bot during the game #{games_counter}.',
                 chat_id=os.environ["MASTER_CHAT_ID"])
+            await telegram_bot.send_document(
+                chat_id=os.environ["MASTER_CHAT_ID"],
+                document=screenshot_path)
         raise
 
 

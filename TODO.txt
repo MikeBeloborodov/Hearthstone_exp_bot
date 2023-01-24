@@ -2,4 +2,6 @@
 - (Done) Create a telegram bot to send error messages from a HS bot
 - (Done) Make a better file system for screenshots and pictures
 - (Done) Change current.jpg type of interaction to a python object
+- (Done) Save the last screenshot before error and send it via telegram
+- Add bot notifications option (as kwargs)
 - Split code into parts and main.py
