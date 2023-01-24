@@ -81,7 +81,7 @@ def get_target_values(target_img_path: str, enemy=False) -> tuple:
     return (target_x, target_y, max_val)
 
 
-def press_button(target_path, enemy=False) -> None:
+def press_button(target_path:str, enemy=False) -> None:
     """
     Find and press a button by it's path name
     Optional 'enemy' argument for get_target_values function
@@ -91,7 +91,7 @@ def press_button(target_path, enemy=False) -> None:
     pyautogui.click(target_x, target_y)
 
 
-def wait_for_target(target_img_path, click=False, treasure_item=False) -> bool:
+def wait_for_target(target_img_path: str, click=False, treasure_item=False) -> bool:
     """
     Waits for target to appear on the screen
     and returns True if it did.
@@ -131,7 +131,7 @@ def wait_for_target(target_img_path, click=False, treasure_item=False) -> bool:
         return True
 
 
-def find_the_target(target_img_path, treasure_item=False) -> bool:
+def find_the_target(target_img_path: str, treasure_item=False) -> bool:
     """
     Checks if target is on the screen.
     """
@@ -188,7 +188,7 @@ def battle_sequence() -> None:
             win = True
     
 
-def key_capture_thread():
+def key_capture_thread() -> None:
     """
     This thread is looking for enter key
     to stop the waiting cycle
