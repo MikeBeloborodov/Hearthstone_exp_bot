@@ -98,8 +98,8 @@ def wait_for_target(target_img_path: str, click=False, treasure_item=False) -> b
     Optional argument 'click' will click the target.
     """
     found = False
-    max_tries = 0 
-    while not found and max_tries < 300:
+    times_tried = 0 
+    while not found and times_tried < 300:
         screenshot = pyautogui.screenshot()
         open_cv_image = np.array(screenshot)
         # Convert RGB to BGR 
@@ -121,10 +121,17 @@ def wait_for_target(target_img_path: str, click=False, treasure_item=False) -> b
             found = True
             if click: press_button(target_img_path)
         else:
-            max_tries += 1
+            times_tried += 1
             time.sleep(1)
 
-    if max_tries >= 300:
+        # Sometimes there are aditional rewards and such
+        # this helps to click trough them and continue
+        if times_tried == 100:
+            for i in range(0,3):
+                pyautogui.click(MONITOR_WIDTH / 2, MONITOR_HEIGHT / 2)
+                time.sleep(1)
+
+    if times_tried >= 300:
         print(f'Error. Max tries reached to find {target_img_path}')
         raise
     else:
@@ -214,7 +221,7 @@ async def waiting_cycle() -> None:
         time.sleep(1)
         countdown -= 1
     
-    # desktop notification
+    # desktop times_tried
     notification.show()
     # if -t option was used sends a telegram notification
     if args.telegram_notification:
@@ -264,12 +271,12 @@ async def start_bot():
                 time.sleep(2)
 
             # Click trough prizes
-            max_tries = 0
+            times_tried = 0
             while not find_the_target('data/treasure_item.jpg', treasure_item=True):
                 pyautogui.click()
                 time.sleep(1)
-                max_tries += 1
-                if max_tries >= 300:
+                times_tried += 1
+                if times_tried >= 300:
                     print("Error. Max tries reached while trying to find treasure_item.jpg")
                     raise
 
@@ -288,12 +295,12 @@ async def start_bot():
             # Click on the retire confirm button
             wait_for_target('data/retire_confirm_button.jpg', click=True)
 
-            max_tries = 0
+            times_tried = 0
             while not find_the_target('data/location_choice_button.jpg'):
                 pyautogui.click(MONITOR_WIDTH / 2, MONITOR_HEIGHT / 2)
                 time.sleep(1)
-                max_tries += 1
-                if max_tries > 300:
+                times_tried += 1
+                if times_tried > 300:
                     print("Error. Max tries reached while trying to find location_choice_button.jpg")
                     raise
             
