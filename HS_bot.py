@@ -21,6 +21,15 @@ parser.add_argument(
     help="Sends a telegram notification when the battle starts.",
     action="store_true"
     )
+
+# -i option tells program that you are in game right now
+# and it won't launch hearthstone from battle.net
+parser.add_argument(
+    "-i",
+    "--in_game",
+    help="Use this option if you are in game right now. Otherwise program will open a new hearthstone window.",
+    action="store_true"
+)
 args = parser.parse_args()
 
 # load env variables
@@ -34,8 +43,12 @@ TREASURE_ITEM_CONFIDENCE_TRESHOLD = 0.4
 MONITOR_WIDTH = GetSystemMetrics(0)
 MONITOR_HEIGHT = GetSystemMetrics(1)
 
-# Time to wait between cycles in seconds
-TIME_TO_WAIT = 1620
+TIME_TO_WAIT = 1720 # Time to wait between cycles in seconds
+TIME_TO_SLEEP_AFTER_CRASH = 600
+TIME_BEFORE_FIND_TARGET = 60
+
+# Max crashes before program stops
+MAX_CRASHES_TRESHOLD = 3
 
 # Continue or stop the waiting cycle
 continue_waiting = True
@@ -124,24 +137,31 @@ def wait_for_target(target_img_path: str, click=False, treasure_item=False) -> b
             times_tried += 1
             time.sleep(1)
 
+        """
         # Sometimes there are aditional rewards and such
         # this helps to click trough them and continue
         if times_tried == 100:
             for i in range(0,3):
                 pyautogui.click(MONITOR_WIDTH / 2, MONITOR_HEIGHT / 2)
                 time.sleep(1)
+        """
 
-    if times_tried >= 300:
+    if times_tried >= 150:
         print(f'Error. Max tries reached to find {target_img_path}')
         raise
     else:
         return True
 
 
-def find_the_target(target_img_path: str, treasure_item=False) -> bool:
+def find_the_target(target_img_path: str, treasure_item=False, time_to_wait=0) -> bool:
     """
     Checks if target is on the screen.
     """
+
+    # Sleep before the search
+    # 0 by default
+    time.sleep(time_to_wait)
+
     screenshot = pyautogui.screenshot()
     open_cv_image = np.array(screenshot)
     # Convert RGB to BGR 
@@ -243,10 +263,73 @@ async def start_bot():
     telegram_bot = telegram.Bot(os.environ["BOT_TOKEN"])
     
     games_counter = 1
-    try:
-        while True:
+    crashes_counter = 0
+    while crashes_counter < MAX_CRASHES_TRESHOLD:
+        try:
+            # Time to switch to HS or battle.net screen
+            time.sleep(3) 
 
-            time.sleep(3) # Time to switch to HS screen
+            if not args.in_game:
+                # Clicks on play button in battle net
+                wait_for_target('data/battle_net_play_button.jpg', click=True)
+
+                # Check if game crashed during the battle
+                # then continue fighting
+                if find_the_target('data/ability_icon.jpg', time_to_wait=TIME_BEFORE_FIND_TARGET):
+                    # Fight
+                    battle_sequence()
+                    time.sleep(2)
+
+                    # Click trough prizes
+                    times_tried = 0
+                    while not find_the_target('data/treasure_item.jpg', treasure_item=True):
+                        pyautogui.click()
+                        time.sleep(1)
+                        times_tried += 1
+                        if times_tried >= 300:
+                            print("Error. Max tries reached while trying to find treasure_item.jpg")
+                            raise
+
+                    # Click on the treasure icon
+                    wait_for_target('data/treasure_item.jpg', click=True, treasure_item=True)
+
+                    # Click on the take treasure button
+                    wait_for_target('data/take_treasure_button.jpg', click=True)
+
+                    # Click on the view party button
+                    wait_for_target('data/view_party_button.jpg', click=True)
+
+                    # Click on the retire button
+                    wait_for_target('data/retire_button.jpg', click=True)
+
+                    # Click on the retire confirm button
+                    wait_for_target('data/retire_confirm_button.jpg', click=True)
+
+                    # Clicks trough the rewards
+                    times_tried = 0
+                    while not find_the_target('data/location_choice_button.jpg'):
+                        pyautogui.click(MONITOR_WIDTH / 2, MONITOR_HEIGHT / 2)
+                        time.sleep(1)
+                        times_tried += 1
+                        if times_tried > 300:
+                            print("Error. Max tries reached while trying to find location_choice_button.jpg")
+                            raise
+
+                    # Set in game to true and continue loop from the beginning
+                    args.in_game = True
+                    continue
+
+                # Clicks on mercenaries mode button
+                wait_for_target('data/mercenaries_button.jpg', click=True)
+
+                # Clicks on the new run button
+                wait_for_target('data/mercenaries_new_run.jpg', click=True)
+
+                # Clicks on choose barrens button
+                wait_for_target('data/mercenaries_choose_barrens.jpg', click=True)
+
+                # Switch to in game after it opens the window for the 1st time
+                args.in_game = True
 
             print(f'Game {games_counter} started.')
 
@@ -255,6 +338,12 @@ async def start_bot():
 
             # Party choice
             wait_for_target('data/party_choice_button.jpg', click=True)
+
+            # The very first run asks you to lock in the party
+            # This checks for confirmation button
+            time.sleep(1)
+            if find_the_target('data/lock_in_party_confirmation_button.jpg'):
+                wait_for_target('data/lock_in_party_confirmation_button.jpg', click=True)
 
             # Play button
             wait_for_target('data/play_button.jpg', click=True)
@@ -295,6 +384,7 @@ async def start_bot():
             # Click on the retire confirm button
             wait_for_target('data/retire_confirm_button.jpg', click=True)
 
+            # Clicks trough the rewards
             times_tried = 0
             while not find_the_target('data/location_choice_button.jpg'):
                 pyautogui.click(MONITOR_WIDTH / 2, MONITOR_HEIGHT / 2)
@@ -306,21 +396,28 @@ async def start_bot():
             
             print(f'Game {games_counter} ended.')
             games_counter += 1
-    except Exception as error:
-        # saves error screenshot
-        screenshot_path = 'errors/' + str(datetime.datetime.now())[:-7].replace(':', '.') + '.jpg'
-        pyautogui.screenshot(screenshot_path)
-        print(error)
+        except Exception as error:
+            
+            crashes_counter += 1
 
-        # sends message to the telegram using a bot
-        async with telegram_bot:
-            await telegram_bot.send_message(
-                text=f'Error with bot during the game #{games_counter}.',
-                chat_id=os.environ["MASTER_CHAT_ID"])
-            await telegram_bot.send_document(
-                chat_id=os.environ["MASTER_CHAT_ID"],
-                document=screenshot_path)
-        raise
+            # saves error screenshot
+            screenshot_path = 'errors/' + str(datetime.datetime.now())[:-7].replace(':', '.') + '.jpg'
+            pyautogui.screenshot(screenshot_path)
+            print(error)
+
+            # sends message to the telegram using a bot
+            async with telegram_bot:
+                await telegram_bot.send_message(
+                    text=f'Error with bot during the game #{games_counter}. Crash # {crashes_counter}.',
+                    chat_id=os.environ["MASTER_CHAT_ID"])
+                await telegram_bot.send_document(
+                    chat_id=os.environ["MASTER_CHAT_ID"],
+                    document=screenshot_path)
+
+            # Close Hearthstone application and set in game to false
+            os.system("taskkill /im Hearthstone.exe")
+            args.in_game = False
+            time.sleep(TIME_TO_SLEEP_AFTER_CRASH)
 
 
 if __name__ == '__main__':
