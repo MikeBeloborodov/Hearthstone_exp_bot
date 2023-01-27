@@ -45,10 +45,10 @@ MONITOR_HEIGHT = GetSystemMetrics(1)
 
 TIME_TO_WAIT = 1720 # Time to wait between cycles in seconds
 TIME_TO_SLEEP_AFTER_CRASH = 600
-TIME_BEFORE_FIND_TARGET = 60
+TIME_BEFORE_FIND_TARGET = 60 # Used after crash
 
 # Max crashes before program stops
-MAX_CRASHES_TRESHOLD = 3
+MAX_CRASHES_TRESHOLD = 10
 
 # Continue or stop the waiting cycle
 continue_waiting = True
@@ -233,7 +233,13 @@ async def waiting_cycle() -> None:
     """
     global continue_waiting
     global args
-    th.Thread(target=key_capture_thread, args=(), name='key_capture_thread', daemon=True).start()
+
+    # Checks other thread 
+    # and only starts if there are no other similar ones
+    thread_names = [thread.name for thread in th.enumerate()]
+    if "key_capture_thread" not in thread_names:
+        th.Thread(target=key_capture_thread, args=(), name='key_capture_thread', daemon=True).start()
+
     countdown = TIME_TO_WAIT
     while countdown != 0 and continue_waiting:
         if countdown % 60 == 0:
@@ -241,7 +247,7 @@ async def waiting_cycle() -> None:
         time.sleep(1)
         countdown -= 1
     
-    # desktop times_tried
+    # desktop notification
     notification.show()
     # if -t option was used sends a telegram notification
     if args.telegram_notification:
@@ -252,7 +258,7 @@ async def waiting_cycle() -> None:
                 chat_id=os.environ["MASTER_CHAT_ID"])
         
     continue_waiting = True
-
+    
 
 async def start_bot():
     """
