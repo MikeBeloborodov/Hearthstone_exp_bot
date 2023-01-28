@@ -5,4 +5,4 @@
 - (Done) Save the last screenshot before error and send it via telegram
 - (Done) Add bot notifications option (as kwargs)
 - Handle telegram errors
-- Split code into parts and main.py
+- (Done) Split code into parts and main.py
