@@ -143,7 +143,7 @@ class HearthstoneBot:
 
         print(target_img_path)
         for attempt in range(0, max_tries):
-            time.sleep(1.5)
+            time.sleep(2)
             target_x, target_y, max_value = self.get_target_values(
                 target_img_path=target_img_path,
                 start_x=start_x,
