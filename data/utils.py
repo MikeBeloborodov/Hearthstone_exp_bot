@@ -10,8 +10,6 @@ CONFIDENCE_TRESHOLD = 0.7
 TREASURE_ITEM_CONFIDENCE_TRESHOLD = 0.4
 # Enemy treshold
 ENEMY_CONFIDENCE_TRESHOLD = 0.2
-# Ability treshold
-ABILITY_CONFIDENCE_TRESHOLD = 0.4
 
 
 """
@@ -42,6 +40,8 @@ MONITOR_HEIGHT = GetSystemMetrics(1)
 Paths to target images
 """
 ABILITY_ICON = 'data/images/ability_icon.jpg'
+ABILITY_ICON_2 = 'data/images/ability_icon_2.jpg'
+ABILITY_ICON_3 = 'data/images/ability_icon_3.jpg'
 BATTLE_NET_PLAY_BUTTON = 'data/images/battle_net_play_button.jpg'
 BATTLE_SPOILS_ICON = 'data/images/battle_spoils.jpg'
 ENEMY_ICON = 'data/images/enemy.jpg'
@@ -61,3 +61,5 @@ VICTORY_EMBLEM = 'data/images/victory_emblem.jpg'
 VIEW_PARTY_BUTTON = 'data/images/view_party_button.jpg'
 YELLOW_PRE_BATTLE_BUTTON = 'data/images/yellow_button_pre_battle.jpg'
 YOUR_QUESTS_ICON = 'data/images/your_quests.jpg'
+READY_BUTTON = 'data/images/ready_button.jpg'
+GREEN_READY_BUTTON = 'data/images/green_ready_button.jpg'

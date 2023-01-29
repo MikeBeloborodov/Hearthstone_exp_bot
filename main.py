@@ -10,7 +10,10 @@ from data.utils import (
     MAX_CRASHES_TRESHOLD,
     T_AFTER_CRASH,
     BATTLE_NET_PLAY_BUTTON,
-    ABILITY_ICON,
+    READY_BUTTON,
+    GREEN_READY_BUTTON,
+    FIGHT_BUTTON,
+    VICTORY_EMBLEM
 )
 
 
@@ -73,8 +76,18 @@ async def main():
 
                 hs_bot.search_and_click_on_target(BATTLE_NET_PLAY_BUTTON)
 
-                if hs_bot.is_target_on_screen(ABILITY_ICON, max_tries=30):
-                    hs_bot.battle_sequence()
+                if hs_bot.search_multiple_targets(
+                    [READY_BUTTON, GREEN_READY_BUTTON, FIGHT_BUTTON], 
+                    max_tries=30
+                ):
+                    hs_bot.click_on_target()
+
+                    if not hs_bot.is_target_on_screen(
+                        VICTORY_EMBLEM,
+                        max_tries=30
+                    ):
+                        hs_bot.battle_sequence()
+
                     hs_bot.collect_rewards()
                     hs_bot.retire_party()
                     args.pre_run_menu = True

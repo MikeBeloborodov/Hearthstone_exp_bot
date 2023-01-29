@@ -6,5 +6,7 @@
 - (Done) Add bot notifications option (as kwargs)
 - Handle telegram errors
 - (Done) Split code into parts and main.py
-- Write a guide how to use a program in README.md
+- Write a guide on how to use this program
 - Write tests
+- Handle more exceptions
+- Choose Ferocious Quilboar for every battle

@@ -12,6 +12,8 @@ from .utils import (
     MAX_SEARCH_TRIES,
     MAX_VICTORY_SEARCH,
     ABILITY_ICON,
+    ABILITY_ICON_2,
+    ABILITY_ICON_3,
     ENEMY_ICON,
     FIGHT_BUTTON,
     VICTORY_EMBLEM,
@@ -33,16 +35,18 @@ from .utils import (
     RETIRE_CONFIRM_BUTTON,
     BATTLE_SPOILS_ICON,
     ENEMY_CONFIDENCE_TRESHOLD,
-    ABILITY_CONFIDENCE_TRESHOLD,
 )
-from .exceptions import MaxTriesReached
+from .exceptions import (
+    MaxTriesReached, 
+    MissingAbilityButton,
+    MissingEnemyButton
+)
 
 
 class HearthstoneBot:
     """
     Autoclicker bot for Hearthstone mercenaries mode.
     """
-
 
     def __init__(self):
         self.target_x = 0
@@ -53,6 +57,7 @@ class HearthstoneBot:
     def show_desktop_notification(self, message: str) -> None:
         """
         This method shows a popup desktop notification.
+
         Args:
             message (str): Notification text message.
         """
@@ -123,7 +128,6 @@ class HearthstoneBot:
         width: int = MONITOR_WIDTH,
         height: int = MONITOR_HEIGHT
     ) -> bool:
-
         """
         Use this method to check if target image is on screen
         and save it's coordinates if it is.
@@ -165,6 +169,7 @@ class HearthstoneBot:
         """
         Use this method to click on target with stored x and y values.
         """
+
         pyautogui.click(self.target_x, self.target_y)
 
 
@@ -203,6 +208,50 @@ class HearthstoneBot:
             self.click_on_target()
         else:
             raise MaxTriesReached
+        
+
+    def search_multiple_targets(
+        self, 
+        target_imgs: list,
+        max_tries: int = MAX_SEARCH_TRIES,
+        confidence_treshold: float = CONFIDENCE_TRESHOLD,
+        start_x: int = 0,
+        start_y: int = 0,
+        width: int = MONITOR_WIDTH,
+        height: int = MONITOR_HEIGHT
+    ) -> bool:
+        """
+        Use this method to search trough multiple images.
+        If it finds the image it saves it's coordinates
+        and returns True.
+
+        Args:
+            target_imgs (list[str]): List of paths to target images.
+            confidence_treshold (float): Minimal cv2 confidence for the target.
+            max_tries (int): Maximum attempts at searching for target.
+            start_x (int): x coordinate of the search area top point.
+            start_y (int): y coordinate of the search area top point.
+            width (int): Search area width.
+            height (int): Search area height.
+
+        Returns:
+            True / False (bool): True if target is on screen.
+        """
+
+        for attempt in range (0, max_tries):
+            for target_img in target_imgs:
+                if self.is_target_on_screen(
+                    target_img_path=target_img,
+                    confidence_treshold=confidence_treshold,
+                    max_tries=1,
+                    start_x=start_x,
+                    start_y=start_y,
+                    width=width,
+                    height=height
+                ):
+                    return True
+        return False
+
 
 
     def go_to_mercenaries(self) -> None:
@@ -248,18 +297,23 @@ class HearthstoneBot:
         while not win:
             for counter in range(0,3):
                 # Press hero ability button
-                self.search_and_click_on_target(
-                    ABILITY_ICON,
-                    confidence_treshold=ABILITY_CONFIDENCE_TRESHOLD
-                )
+                if self.search_multiple_targets(
+                    [ABILITY_ICON, ABILITY_ICON_2, ABILITY_ICON_3],
+                ):
+                    self.click_on_target()
+                else:
+                    raise MissingAbilityButton
 
                 # Press enemy icon
-                self.search_and_click_on_target(
-                    ENEMY_ICON,
+                if self.search_multiple_targets(
+                    [ENEMY_ICON],
                     confidence_treshold=ENEMY_CONFIDENCE_TRESHOLD,
                     height=int(MONITOR_HEIGHT / 2.5)
-                )
-                pyautogui.move(0, -200)
+                ):
+                    self.click_on_target()
+                    pyautogui.move(0, -200)
+                else:
+                    raise MissingEnemyButton
 
             # Press fight button
             self.search_and_click_on_target(FIGHT_BUTTON)
@@ -314,6 +368,7 @@ class HearthstoneBot:
         """
         This method is used to capture Enter key in a separate thread.
         """
+
         input()
         self.continue_waiting = False
 
@@ -323,6 +378,7 @@ class HearthstoneBot:
         Use this method to start a new thread to capture
         Enter key and stop waiting cycle between battles.
         """
+
         thread_names = [thread.name for thread in th.enumerate()]
         if "key_capture_thread" not in thread_names:
             th.Thread(
@@ -339,6 +395,7 @@ class HearthstoneBot:
         """
 
         # Listens for Enter key to stop waiting cycle.
+
         self.start_key_capture_thread()
 
         countdown = T_BETWEEN_CYCLES
