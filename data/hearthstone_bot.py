@@ -30,6 +30,7 @@ from .utils import (
     TREASURE_ITEM_CONFIDENCE_TRESHOLD,
     TAKE_TREASURE_BUTTON,
     YOUR_QUESTS_ICON,
+    YOUR_WEEKLY_QUESTS,
     VIEW_PARTY_BUTTON,
     RETIRE_BUTTON,
     RETIRE_CONFIRM_BUTTON,
@@ -258,6 +259,12 @@ class HearthstoneBot:
         """
         Use this method to navigate to the mercenaries mode.
         """
+
+        if self.is_target_on_screen(YOUR_QUESTS_ICON, max_tries=10):
+            self.click_on_target()
+
+        if self.is_target_on_screen(YOUR_WEEKLY_QUESTS, max_tries=10):
+            self.click_on_target()
 
         self.search_and_click_on_target(MERCS_BUTTON)
 
