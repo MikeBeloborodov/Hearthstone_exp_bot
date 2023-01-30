@@ -36,6 +36,7 @@ from .utils import (
     RETIRE_CONFIRM_BUTTON,
     BATTLE_SPOILS_ICON,
     ENEMY_CONFIDENCE_TRESHOLD,
+    CLOSE_BUNDLE,
 )
 from .exceptions import (
     MaxTriesReached, 
@@ -260,14 +261,21 @@ class HearthstoneBot:
         Use this method to navigate to the mercenaries mode.
         """
 
-        if self.is_target_on_screen(YOUR_QUESTS_ICON, max_tries=10):
+        # Closes shop bundles 
+        if self.is_target_on_screen(CLOSE_BUNDLE, max_tries=3):
             self.click_on_target()
 
-        if self.is_target_on_screen(YOUR_WEEKLY_QUESTS, max_tries=10):
+        # Closes daily quests
+        if self.is_target_on_screen(YOUR_QUESTS_ICON, max_tries=3):
+            self.click_on_target()
+
+        # Closes weekly quests
+        if self.is_target_on_screen(YOUR_WEEKLY_QUESTS, max_tries=3):
             self.click_on_target()
 
         self.search_and_click_on_target(MERCS_BUTTON)
 
+        # Closes battle spoils in mercs
         if self.is_target_on_screen(BATTLE_SPOILS_ICON, max_tries=2):
             self.click_on_target()
 
