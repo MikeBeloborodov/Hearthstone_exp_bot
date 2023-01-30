@@ -78,7 +78,7 @@ async def main():
 
                 if hs_bot.search_multiple_targets(
                     [READY_BUTTON, GREEN_READY_BUTTON, FIGHT_BUTTON], 
-                    max_tries=15
+                    max_tries=5
                 ):
                     hs_bot.click_on_target()
 

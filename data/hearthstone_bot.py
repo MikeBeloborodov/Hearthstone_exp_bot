@@ -14,7 +14,12 @@ from .utils import (
     ABILITY_ICON,
     ABILITY_ICON_2,
     ABILITY_ICON_3,
-    ENEMY_ICON,
+    ENEMY_ICON_1,
+    ENEMY_ICON_2,
+    ENEMY_ICON_3,
+    ENEMY_ICON_4,
+    ENEMY_ICON_5,
+    ENEMY_ICON_6,
     FIGHT_BUTTON,
     VICTORY_EMBLEM,
     T_BETWEEN_CYCLES,
@@ -37,6 +42,8 @@ from .utils import (
     BATTLE_SPOILS_ICON,
     ENEMY_CONFIDENCE_TRESHOLD,
     CLOSE_BUNDLE,
+    LEFT_ARROW,
+    QUILBOAR_LOCATION,
 )
 from .exceptions import (
     MaxTriesReached, 
@@ -289,6 +296,11 @@ class HearthstoneBot:
         Use this method to start new run
         From the location choice menu.
         """
+        # CLick on left arrow to scroll to the beginning
+        while self.is_target_on_screen(LEFT_ARROW, max_tries=1):
+            self.click_on_target()
+
+        self.search_and_click_on_target(QUILBOAR_LOCATION)
 
         self.search_and_click_on_target(LOCATION_CHOICE_BUTTON)
 
@@ -321,7 +333,10 @@ class HearthstoneBot:
 
                 # Press enemy icon
                 if self.search_multiple_targets(
-                    [ENEMY_ICON],
+                    [
+                        ENEMY_ICON_1, ENEMY_ICON_2, ENEMY_ICON_3,
+                        ENEMY_ICON_4, ENEMY_ICON_5, ENEMY_ICON_6
+                    ],
                     confidence_treshold=ENEMY_CONFIDENCE_TRESHOLD,
                     height=int(MONITOR_HEIGHT / 2.5)
                 ):
