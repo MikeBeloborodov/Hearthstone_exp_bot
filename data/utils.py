@@ -5,7 +5,7 @@ from win32api import GetSystemMetrics
 Tresholds for cv2
 """
 # General treshold
-CONFIDENCE_TRESHOLD = 0.8
+CONFIDENCE_TRESHOLD = 0.5
 # Treshold for treasure items
 TREASURE_ITEM_CONFIDENCE_TRESHOLD = 0.45
 # Enemy treshold

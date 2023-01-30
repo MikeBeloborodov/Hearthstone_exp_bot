@@ -297,7 +297,7 @@ class HearthstoneBot:
         From the location choice menu.
         """
         # CLick on left arrow to scroll to the beginning
-        while self.is_target_on_screen(LEFT_ARROW, max_tries=1):
+        if self.is_target_on_screen(LEFT_ARROW, max_tries=1):
             self.click_on_target()
 
         self.search_and_click_on_target(QUILBOAR_LOCATION)
