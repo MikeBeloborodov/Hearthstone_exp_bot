@@ -4,10 +4,10 @@ import datetime
 import threading as th
 from winotify import Notification, audio
 import pyautogui
+import win32gui
+from PIL import ImageGrab
 import cv2 as cv
 from .utils import (
-    MONITOR_WIDTH,
-    MONITOR_HEIGHT,
     CONFIDENCE_TRESHOLD,
     MAX_SEARCH_TRIES,
     MAX_VICTORY_SEARCH,
@@ -62,15 +62,12 @@ class HearthstoneBot:
         self.target_x = 0
         self.target_y = 0
         self.continue_waiting = True
+        self.current_window = None
 
 
     def get_target_values(
         self, 
         target_img_path: str,
-        start_x: int = 0,
-        start_y: int = 0,
-        width: int = MONITOR_WIDTH,
-        height: int = MONITOR_HEIGHT
     ) -> tuple:
         """
         Use this method to get a tuple of 
@@ -79,10 +76,6 @@ class HearthstoneBot:
 
         Args:
             target_img_path (str): Path to the target image.
-            start_x (int): x coordinate of the search area top point.
-            start_y (int): y coordinate of the search area top point.
-            width (int): Search area width.
-            height (int): Search area height.
 
         Returns:
             (target_x, target_y, max_value)
@@ -91,10 +84,18 @@ class HearthstoneBot:
             max_value (float): Value from 0 to 1. Max confidence value of cv2.
         """
         
-        screenshot = pyautogui.screenshot( 
-            region=(start_x, start_y, width, height)
-        )
-        open_cv_image = np.array(screenshot)
+        hwnd = win32gui.FindWindow(None, self.current_window)
+        while True:
+            try:
+                win32gui.SetForegroundWindow(hwnd)
+            except Exception as error:
+                pass
+            else:
+                break
+        bbox = win32gui.GetWindowRect(hwnd)
+        left, top, right, bottom = bbox
+        img = ImageGrab.grab(bbox)
+        open_cv_image = np.array(img)
         # Convert RGB to BGR 
         open_cv_image = open_cv_image[:, :, ::-1].copy()
 
@@ -105,8 +106,12 @@ class HearthstoneBot:
 
         min_val, max_val, min_loc, max_loc = cv.minMaxLoc(result)
 
-        target_y = max_loc[1] + int(needle.shape[0] / 2)
-        target_x = max_loc[0] + int(needle.shape[1] / 2)
+        target_y = max_loc[1] + int(needle.shape[0] / 2) + top
+        target_x = max_loc[0] + int(needle.shape[1] / 2) + left
+        print(f'target_y: {target_y}')
+        print(f'target_x: {target_x}')
+        print(f'top: {top}')
+        print(f'left: {left}')
 
         print(f'file - {target_img_path}, max_value - {max_val}')
         return (target_x, target_y, max_val)
@@ -117,10 +122,6 @@ class HearthstoneBot:
         target_img_path: str,
         max_tries: int = MAX_SEARCH_TRIES,
         confidence_treshold: float = CONFIDENCE_TRESHOLD,
-        start_x: int = 0,
-        start_y: int = 0,
-        width: int = MONITOR_WIDTH,
-        height: int = MONITOR_HEIGHT
     ) -> bool:
         """
         Use this method to check if target image is on screen
@@ -130,10 +131,6 @@ class HearthstoneBot:
             target_img_path (str): Path to the target image.
             confidence_treshold (float): Minimal cv2 confidence for the target.
             max_tries (int): Maximum attempts at searching for target.
-            start_x (int): x coordinate of the search area top point.
-            start_y (int): y coordinate of the search area top point.
-            width (int): Search area width.
-            height (int): Search area height.
 
         Returns:
             True / False (bool): True if target is on screen.
@@ -144,10 +141,6 @@ class HearthstoneBot:
             time.sleep(2)
             target_x, target_y, max_value = self.get_target_values(
                 target_img_path=target_img_path,
-                start_x=start_x,
-                start_y=start_y,
-                width=width,
-                height=height
             )
 
             if max_value >= confidence_treshold:
@@ -172,10 +165,6 @@ class HearthstoneBot:
         target_img_path: str,
         max_tries: int = MAX_SEARCH_TRIES,
         confidence_treshold: float = CONFIDENCE_TRESHOLD,
-        start_x: int = 0,
-        start_y: int = 0,
-        width: int = MONITOR_WIDTH,
-        height: int = MONITOR_HEIGHT
     ) -> None:
         """
         Use this method to check if target is on the screen and click on it.
@@ -184,20 +173,12 @@ class HearthstoneBot:
             target_img_path (str): Path to the target image.
             confidence_treshold (float): Minimal cv2 confidence for the target.
             max_tries (int): Maximum attempts at searching for target.
-            start_x (int): x coordinate of the search area top point.
-            start_y (int): y coordinate of the search area top point.
-            width (int): Search area width.
-            height (int): Search area height.
         """
 
         if self.is_target_on_screen(
             target_img_path=target_img_path,
             confidence_treshold=confidence_treshold,
             max_tries=max_tries,
-            start_x=start_x,
-            start_y=start_y,
-            width=width,
-            height=height
         ):
             self.click_on_target()
         else:
@@ -209,10 +190,6 @@ class HearthstoneBot:
         target_imgs: list,
         max_tries: int = MAX_SEARCH_TRIES,
         confidence_treshold: float = CONFIDENCE_TRESHOLD,
-        start_x: int = 0,
-        start_y: int = 0,
-        width: int = MONITOR_WIDTH,
-        height: int = MONITOR_HEIGHT
     ) -> bool:
         """
         Use this method to search trough multiple images.
@@ -223,10 +200,6 @@ class HearthstoneBot:
             target_imgs (list[str]): List of paths to target images.
             confidence_treshold (float): Minimal cv2 confidence for the target.
             max_tries (int): Maximum attempts at searching for target.
-            start_x (int): x coordinate of the search area top point.
-            start_y (int): y coordinate of the search area top point.
-            width (int): Search area width.
-            height (int): Search area height.
 
         Returns:
             True / False (bool): True if target is on screen.
@@ -238,10 +211,6 @@ class HearthstoneBot:
                     target_img_path=target_img,
                     confidence_treshold=confidence_treshold,
                     max_tries=1,
-                    start_x=start_x,
-                    start_y=start_y,
-                    width=width,
-                    height=height
                 ):
                     return True
         return False
@@ -339,7 +308,6 @@ class HearthstoneBot:
                         ENEMY_ICON_4, ENEMY_ICON_5, ENEMY_ICON_6
                     ],
                     confidence_treshold=ENEMY_CONFIDENCE_TRESHOLD,
-                    height=int(MONITOR_HEIGHT / 2.5)
                 ):
                     self.click_on_target()
                     pyautogui.move(0, -200)
@@ -369,7 +337,7 @@ class HearthstoneBot:
             max_tries=1,
             confidence_treshold=TREASURE_ITEM_CONFIDENCE_TRESHOLD
         ):
-            pyautogui.click( int(MONITOR_WIDTH / 2), int(MONITOR_HEIGHT / 2) )
+            self.click_on_target()
             time.sleep(0.5)
 
         self.click_on_target()
@@ -377,7 +345,7 @@ class HearthstoneBot:
         self.search_and_click_on_target(TAKE_TREASURE_BUTTON)
 
         if self.is_target_on_screen(YOUR_QUESTS_ICON, max_tries=2):
-            pyautogui.click( int(MONITOR_WIDTH / 2), int(MONITOR_HEIGHT / 2) )
+            self.click_on_target()
 
     
     def retire_party(self) -> None:

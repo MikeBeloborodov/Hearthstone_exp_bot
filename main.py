@@ -49,6 +49,7 @@ async def main():
 
             if args.pre_run_menu:
                 # Start new run from mercenaries menu
+                hs_bot.current_window = 'Hearthstone'
                 hs_bot.new_run_from_mercenaries()
 
                 # Send announcements
@@ -77,8 +78,9 @@ async def main():
                 hs_bot.retire_party()
 
             else:
-
+                hs_bot.current_window = 'Battle.net'
                 hs_bot.search_and_click_on_target(BATTLE_NET_PLAY_BUTTON)
+                hs_bot.current_window = 'Hearthstone'
 
                 if hs_bot.search_multiple_targets(
                     [READY_BUTTON, GREEN_READY_BUTTON, FIGHT_BUTTON], 

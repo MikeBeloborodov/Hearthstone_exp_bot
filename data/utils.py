@@ -5,7 +5,7 @@ from win32api import GetSystemMetrics
 Tresholds for cv2
 """
 # General treshold
-CONFIDENCE_TRESHOLD = 0.5
+CONFIDENCE_TRESHOLD = 0.7
 # Treshold for treasure items
 TREASURE_ITEM_CONFIDENCE_TRESHOLD = 0.4
 # Enemy treshold
@@ -29,12 +29,6 @@ MAX_VICTORY_SEARCH = 25
 # Max crashes before program stops
 MAX_CRASHES_TRESHOLD = 10
 
-
-"""
-Monitor height and width values
-"""
-MONITOR_WIDTH = GetSystemMetrics(0)
-MONITOR_HEIGHT = GetSystemMetrics(1)
 
 """
 Paths to target images

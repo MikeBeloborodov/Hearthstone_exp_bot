@@ -3,3 +3,4 @@ env
 errors
 misc
 __pycache__
+tests
