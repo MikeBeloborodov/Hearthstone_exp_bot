@@ -108,10 +108,6 @@ class HearthstoneBot:
 
         target_y = max_loc[1] + int(needle.shape[0] / 2) + top
         target_x = max_loc[0] + int(needle.shape[1] / 2) + left
-        print(f'target_y: {target_y}')
-        print(f'target_x: {target_x}')
-        print(f'top: {top}')
-        print(f'left: {left}')
 
         print(f'file - {target_img_path}, max_value - {max_val}')
         return (target_x, target_y, max_val)
@@ -136,7 +132,6 @@ class HearthstoneBot:
             True / False (bool): True if target is on screen.
         """
 
-        print(target_img_path)
         for attempt in range(0, max_tries):
             time.sleep(2)
             target_x, target_y, max_value = self.get_target_values(

@@ -106,7 +106,7 @@ async def main():
 
             crashes_counter += 1
 
-            hs_bot.handle_exception(
+            await hs_bot.handle_exception(
                 error=error,
                 games_counter=games_counter,
                 crashes_counter=crashes_counter,
@@ -122,7 +122,7 @@ async def main():
 
             crashes_counter += 1
 
-            hs_bot.handle_exception(
+            await hs_bot.handle_exception(
                 error=error,
                 games_counter=games_counter,
                 crashes_counter=crashes_counter,
@@ -138,7 +138,7 @@ async def main():
 
             crashes_counter += 1
 
-            hs_bot.handle_exception(
+            await hs_bot.handle_exception(
                 error=error,
                 games_counter=games_counter,
                 crashes_counter=crashes_counter,
