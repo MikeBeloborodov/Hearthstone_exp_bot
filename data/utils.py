@@ -7,7 +7,7 @@ Tresholds for cv2
 # General treshold
 CONFIDENCE_TRESHOLD = 0.5
 # Treshold for treasure items
-TREASURE_ITEM_CONFIDENCE_TRESHOLD = 0.45
+TREASURE_ITEM_CONFIDENCE_TRESHOLD = 0.4
 # Enemy treshold
 ENEMY_CONFIDENCE_TRESHOLD = 0.5
 
