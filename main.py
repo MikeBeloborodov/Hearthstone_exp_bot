@@ -111,6 +111,11 @@ async def main():
                 tg_bot=tg_bot
             )
 
+            # Close Hearthstone application
+            os.system("taskkill /im Hearthstone.exe")
+            args.pre_run_menu = False
+            time.sleep(T_AFTER_CRASH)
+
         except MissingAbilityButton as error:
 
             crashes_counter += 1
@@ -121,6 +126,11 @@ async def main():
                 crashes_counter=crashes_counter,
                 tg_bot=tg_bot
             )
+
+            # Close Hearthstone application
+            os.system("taskkill /im Hearthstone.exe")
+            args.pre_run_menu = False
+            time.sleep(T_AFTER_CRASH)
 
         except MissingEnemyButton as error:
 
@@ -133,7 +143,6 @@ async def main():
                 tg_bot=tg_bot
             )
 
-        finally:
             # Close Hearthstone application
             os.system("taskkill /im Hearthstone.exe")
             args.pre_run_menu = False

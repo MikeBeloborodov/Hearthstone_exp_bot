@@ -63,22 +63,6 @@ class HearthstoneBot:
         self.target_y = 0
         self.continue_waiting = True
 
-    
-    def show_desktop_notification(self, message: str) -> None:
-        """
-        This method shows a popup desktop notification.
-
-        Args:
-            message (str): Notification text message.
-        """
-
-        notification = Notification(app_id="HS bot",
-                                    title="HS bot message",
-                                    msg=message,
-                                    duration="short")
-        notification.set_audio(audio.Mail, loop=False)
-        notification.show()
-
 
     def get_target_values(
         self, 
@@ -262,6 +246,21 @@ class HearthstoneBot:
                     return True
         return False
 
+    
+    def show_desktop_notification(self, message: str) -> None:
+        """
+        This method shows a popup desktop notification.
+
+        Args:
+            message (str): Notification text message.
+        """
+
+        notification = Notification(app_id="HS bot",
+                                    title="HS bot message",
+                                    msg=message,
+                                    duration="short")
+        notification.set_audio(audio.Mail, loop=False)
+        notification.show()
 
 
     def go_to_mercenaries(self) -> None:
@@ -453,6 +452,7 @@ class HearthstoneBot:
         Returns:
             (str): Full path to the screenshot.
         """
+
         screenshot_path = (
             folder 
             + '/'
