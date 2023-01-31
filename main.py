@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 from data.hearthstone_bot import HearthstoneBot
 from data.telegram_bot import TelegramBot
 from data.args import create_parser
-from data.exceptions import MaxTriesReached
 from data.utils import (
     MAX_CRASHES_TRESHOLD,
     T_AFTER_CRASH,
@@ -14,6 +13,11 @@ from data.utils import (
     GREEN_READY_BUTTON,
     FIGHT_BUTTON,
     VICTORY_EMBLEM
+)
+from data.exceptions import (
+    MaxTriesReached, 
+    MissingAbilityButton,
+    MissingEnemyButton
 )
 
 
@@ -100,21 +104,36 @@ async def main():
 
             crashes_counter += 1
 
-            screenshot_path = hs_bot.save_screenshot(folder='errors')
-
-            error_message = (
-                f'Max search tries reached during the game #{games_counter}. '
-                f'Crash #{crashes_counter}.'
-            )
-            await tg_bot.send_message(
-                message=error_message
-            )
-            await tg_bot.send_document(
-                document_path=screenshot_path
+            hs_bot.handle_exception(
+                error=error,
+                games_counter=games_counter,
+                crashes_counter=crashes_counter,
+                tg_bot=tg_bot
             )
 
-            print(error)
+        except MissingAbilityButton as error:
 
+            crashes_counter += 1
+
+            hs_bot.handle_exception(
+                error=error,
+                games_counter=games_counter,
+                crashes_counter=crashes_counter,
+                tg_bot=tg_bot
+            )
+
+        except MissingEnemyButton as error:
+
+            crashes_counter += 1
+
+            hs_bot.handle_exception(
+                error=error,
+                games_counter=games_counter,
+                crashes_counter=crashes_counter,
+                tg_bot=tg_bot
+            )
+
+        finally:
             # Close Hearthstone application
             os.system("taskkill /im Hearthstone.exe")
             args.pre_run_menu = False

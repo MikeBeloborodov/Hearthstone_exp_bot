@@ -50,6 +50,7 @@ from .exceptions import (
     MissingAbilityButton,
     MissingEnemyButton
 )
+from .telegram_bot import TelegramBot
 
 
 class HearthstoneBot:
@@ -296,6 +297,7 @@ class HearthstoneBot:
         Use this method to start new run
         From the location choice menu.
         """
+
         # CLick on left arrow to scroll to the beginning
         if self.is_target_on_screen(LEFT_ARROW, max_tries=1):
             self.click_on_target()
@@ -451,7 +453,59 @@ class HearthstoneBot:
         Returns:
             (str): Full path to the screenshot.
         """
-        screenshot_path = folder + '/' + str(datetime.datetime.now())[:-7].replace(':', '.') + '.jpg'
+        screenshot_path = (
+            folder 
+            + '/'
+            + str(datetime.datetime.now())[:-7].replace(':', '.')
+            + '.jpg'
+        )
         pyautogui.screenshot(screenshot_path)
 
         return screenshot_path
+
+    
+    async def handle_exception(
+        self, 
+        error: Exception,
+        games_counter: int, 
+        crashes_counter: int,
+        tg_bot: TelegramBot,
+    ) -> None:
+        """
+        Use this method to handle exceptions.
+
+        Args:
+            error (Exception): Exception.
+            games_counter (int): Counts game cycles.
+            crashes_counter (int): Counts number of crashes.
+            tg_bot (TelegramBot): Telegram bot object to send messages.
+        """
+
+        screenshot_path = self.save_screenshot(folder='errors')
+
+        if error == MaxTriesReached:
+            error_message = (
+                f'Max search tries reached during the game #{games_counter}. '
+                f'Crash #{crashes_counter}.'
+            )
+
+        elif error == MissingAbilityButton:
+            error_message = (
+                f'Could not find an ability button during the game #{games_counter}. '
+                f'Crash #{crashes_counter}.'
+            )
+
+        elif error == MissingEnemyButton:
+            error_message = (
+                f'Could not find an enemy icon during the game #{games_counter}. '
+                f'Crash #{crashes_counter}.'
+            )
+
+        await tg_bot.send_message(
+            message=error_message
+        )
+        await tg_bot.send_document(
+            document_path=screenshot_path
+        )
+
+        print(error)
