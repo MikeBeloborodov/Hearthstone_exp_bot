@@ -58,22 +58,8 @@ async def main():
                     await tg_bot.send_message(message=announcement)
 
                 # Waiting cycle
+                args.pre_run_menu = False
                 await hs_bot.wait()
-
-                # Send pre battle announcements
-                announcement = f'Waiting cycle is finished.'
-                hs_bot.show_desktop_notification(message=announcement)
-                if args.tg_notification:
-                    await tg_bot.send_message(message=announcement)
-
-                # Start battle
-                await hs_bot.battle_sequence(tg_bot)
-
-                # Collect rewards
-                hs_bot.collect_rewards()
-
-                # Retire party
-                hs_bot.retire_party()
 
             else:
                 hs_bot.current_window = 'Battle.net'
@@ -85,14 +71,26 @@ async def main():
                     READY_BUTTON, GREEN_READY_BUTTON, FIGHT_BUTTON],
                     max_tries=10
                 ):
-                    await hs_bot.battle_sequence(tg_bot)
-                    hs_bot.collect_rewards()
-                    hs_bot.retire_party()
-                    args.pre_run_menu = True
-                    continue
+                # Send pre battle announcements
+                    announcement = f'Waiting cycle is finished.'
+                    hs_bot.show_desktop_notification(message=announcement)
+                    if args.tg_notification:
+                        await tg_bot.send_message(message=announcement)
 
-                hs_bot.go_to_mercenaries()
-                args.pre_run_menu = True
+                    # Start battle
+                    await hs_bot.battle_sequence(tg_bot)
+
+                    # Collect rewards
+                    hs_bot.collect_rewards()
+
+                    # Retire party
+                    hs_bot.retire_party()
+
+                    args.pre_run_menu = True
+
+                else:
+                    hs_bot.go_to_mercenaries()
+                    args.pre_run_menu = True
 
         except MaxTriesReached as error:
 

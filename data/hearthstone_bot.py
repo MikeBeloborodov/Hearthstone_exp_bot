@@ -287,7 +287,7 @@ class HearthstoneBot:
 
     async def battle_sequence(self, tg_bot: TelegramBot) -> None:
         """
-        Use this method to start the battle sequence
+        Use this method to go trough the battle sequence.
 
         Args:
             tg_bot (TelegramBot): Telegram bot to send messages.
@@ -420,6 +420,9 @@ class HearthstoneBot:
         # Listens for Enter key to stop waiting cycle.
 
         self.start_key_capture_thread()
+
+        # Close Hearthstone application
+        os.system("taskkill /im Hearthstone.exe")
 
         countdown = T_BETWEEN_CYCLES
         while countdown != 0 and self.continue_waiting:
