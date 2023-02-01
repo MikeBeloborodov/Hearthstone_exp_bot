@@ -12,12 +12,12 @@ from data.utils import (
     READY_BUTTON,
     GREEN_READY_BUTTON,
     FIGHT_BUTTON,
-    VICTORY_EMBLEM
+    ABILITY_ICON,
+    ABILITY_ICON_2,
+    ABILITY_ICON_3
 )
 from data.exceptions import (
     MaxTriesReached, 
-    MissingAbilityButton,
-    MissingEnemyButton
 )
 
 
@@ -42,9 +42,7 @@ async def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    games_counter = 0
-    crashes_counter = 0
-    while crashes_counter < MAX_CRASHES_TRESHOLD:
+    while hs_bot.crashes_counter < MAX_CRASHES_TRESHOLD:
         try:
 
             if args.pre_run_menu:
@@ -53,8 +51,8 @@ async def main():
                 hs_bot.new_run_from_mercenaries()
 
                 # Send announcements
-                games_counter += 1
-                announcement = f'Game #{games_counter} started.'
+                hs_bot.games_counter += 1
+                announcement = f'Game #{hs_bot.games_counter} started.'
                 print(announcement)
                 if args.tg_notification:
                     await tg_bot.send_message(message=announcement)
@@ -69,7 +67,7 @@ async def main():
                     await tg_bot.send_message(message=announcement)
 
                 # Start battle
-                hs_bot.battle_sequence()
+                await hs_bot.battle_sequence(tg_bot)
 
                 # Collect rewards
                 hs_bot.collect_rewards()
@@ -83,17 +81,11 @@ async def main():
                 hs_bot.current_window = 'Hearthstone'
 
                 if hs_bot.search_multiple_targets(
-                    [READY_BUTTON, GREEN_READY_BUTTON, FIGHT_BUTTON], 
-                    max_tries=5
+                    [ABILITY_ICON, ABILITY_ICON_2, ABILITY_ICON_3,
+                    READY_BUTTON, GREEN_READY_BUTTON, FIGHT_BUTTON],
+                    max_tries=10
                 ):
-                    hs_bot.click_on_target()
-
-                    if not hs_bot.is_target_on_screen(
-                        VICTORY_EMBLEM,
-                        max_tries=30
-                    ):
-                        hs_bot.battle_sequence()
-
+                    await hs_bot.battle_sequence(tg_bot)
                     hs_bot.collect_rewards()
                     hs_bot.retire_party()
                     args.pre_run_menu = True
@@ -108,40 +100,6 @@ async def main():
 
             await hs_bot.handle_exception(
                 error=error,
-                games_counter=games_counter,
-                crashes_counter=crashes_counter,
-                tg_bot=tg_bot
-            )
-
-            # Close Hearthstone application
-            os.system("taskkill /im Hearthstone.exe")
-            args.pre_run_menu = False
-            time.sleep(T_AFTER_CRASH)
-
-        except MissingAbilityButton as error:
-
-            crashes_counter += 1
-
-            await hs_bot.handle_exception(
-                error=error,
-                games_counter=games_counter,
-                crashes_counter=crashes_counter,
-                tg_bot=tg_bot
-            )
-
-            # Close Hearthstone application
-            os.system("taskkill /im Hearthstone.exe")
-            args.pre_run_menu = False
-            time.sleep(T_AFTER_CRASH)
-
-        except MissingEnemyButton as error:
-
-            crashes_counter += 1
-
-            await hs_bot.handle_exception(
-                error=error,
-                games_counter=games_counter,
-                crashes_counter=crashes_counter,
                 tg_bot=tg_bot
             )
 

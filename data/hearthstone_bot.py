@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import time
 import datetime
@@ -20,7 +21,6 @@ from .utils import (
     ENEMY_ICON_4,
     ENEMY_ICON_5,
     ENEMY_ICON_6,
-    FIGHT_BUTTON,
     VICTORY_EMBLEM,
     T_BETWEEN_CYCLES,
     LOCATION_CHOICE_BUTTON,
@@ -44,6 +44,9 @@ from .utils import (
     CLOSE_BUNDLE,
     LEFT_ARROW,
     QUILBOAR_LOCATION,
+    READY_BUTTON,
+    GREEN_READY_BUTTON,
+    FIGHT_BUTTON,
 )
 from .exceptions import (
     MaxTriesReached, 
@@ -63,6 +66,8 @@ class HearthstoneBot:
         self.target_y = 0
         self.continue_waiting = True
         self.current_window = None
+        self.games_counter = 0
+        self.crashes_counter = 0
 
 
     def get_target_values(
@@ -280,34 +285,58 @@ class HearthstoneBot:
         self.search_and_click_on_target(YELLOW_PRE_BATTLE_BUTTON)
 
 
-    def battle_sequence(self) -> None:
+    async def battle_sequence(self, tg_bot: TelegramBot) -> None:
         """
         Use this method to start the battle sequence
+
+        Args:
+            tg_bot (TelegramBot): Telegram bot to send messages.
         """
 
         win = False
         while not win:
             for counter in range(0,3):
+
                 # Press hero ability button
-                if self.search_multiple_targets(
-                    [ABILITY_ICON, ABILITY_ICON_2, ABILITY_ICON_3],
-                ):
-                    self.click_on_target()
-                else:
-                    raise MissingAbilityButton
+                try:
+                    if self.search_multiple_targets(
+                        [ABILITY_ICON, ABILITY_ICON_2, ABILITY_ICON_3],
+                    ):
+                        self.click_on_target()
+                    else:
+                        raise MissingAbilityButton
+                except MissingAbilityButton as error:
+                    await self.handle_exception(error, tg_bot)
+                    if not self.search_multiple_targets(
+                        [READY_BUTTON, GREEN_READY_BUTTON, FIGHT_BUTTON],
+                    ):
+                        raise MaxTriesReached
+                    else:
+                        self.click_on_target()
+                        continue
 
                 # Press enemy icon
-                if self.search_multiple_targets(
-                    [
-                        ENEMY_ICON_1, ENEMY_ICON_2, ENEMY_ICON_3,
-                        ENEMY_ICON_4, ENEMY_ICON_5, ENEMY_ICON_6
-                    ],
-                    confidence_treshold=ENEMY_CONFIDENCE_TRESHOLD,
-                ):
-                    self.click_on_target()
-                    pyautogui.move(0, -200)
-                else:
-                    raise MissingEnemyButton
+                try:
+                    if self.search_multiple_targets(
+                        [
+                            ENEMY_ICON_1, ENEMY_ICON_2, ENEMY_ICON_3,
+                            ENEMY_ICON_4, ENEMY_ICON_5, ENEMY_ICON_6
+                        ],
+                        confidence_treshold=ENEMY_CONFIDENCE_TRESHOLD,
+                    ):
+                        self.click_on_target()
+                        pyautogui.move(0, -200)
+                    else:
+                        raise MissingEnemyButton
+                except MissingEnemyButton as error:
+                    await self.handle_exception(error, tg_bot)
+                    if not self.search_multiple_targets(
+                        [READY_BUTTON, GREEN_READY_BUTTON, FIGHT_BUTTON],
+                    ):
+                        raise MaxTriesReached
+                    else:
+                        self.click_on_target()
+                        continue
 
             # Press fight button
             self.search_and_click_on_target(FIGHT_BUTTON)
@@ -416,6 +445,9 @@ class HearthstoneBot:
             (str): Full path to the screenshot.
         """
 
+        if not os.path.exists(folder):
+            os.mkdir(folder)
+
         screenshot_path = (
             folder 
             + '/'
@@ -430,8 +462,6 @@ class HearthstoneBot:
     async def handle_exception(
         self, 
         error: Exception,
-        games_counter: int, 
-        crashes_counter: int,
         tg_bot: TelegramBot,
     ) -> None:
         """
@@ -448,20 +478,20 @@ class HearthstoneBot:
 
         if error == MaxTriesReached:
             error_message = (
-                f'Max search tries reached during the game #{games_counter}. '
-                f'Crash #{crashes_counter}.'
+                f'Max search tries reached during the game #{self.games_counter}. '
+                f'Crash #{self.crashes_counter}.'
             )
 
         elif error == MissingAbilityButton:
             error_message = (
-                f'Could not find an ability button during the game #{games_counter}. '
-                f'Crash #{crashes_counter}.'
+                f'Could not find an ability button during the game #{self.games_counter}. '
+                f'Crash #{self.crashes_counter}.'
             )
 
         elif error == MissingEnemyButton:
             error_message = (
-                f'Could not find an enemy icon during the game #{games_counter}. '
-                f'Crash #{crashes_counter}.'
+                f'Could not find an enemy icon during the game #{self.games_counter}. '
+                f'Crash #{self.crashes_counter}.'
             )
 
         await tg_bot.send_message(
