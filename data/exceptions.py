@@ -17,3 +17,10 @@ class MissingEnemyButton(Exception):
     Raised when battle sequence method could not find an enemy icon.
     """
     pass
+
+
+class MissingFightButton(Exception):
+    """
+    Raised when battle sequence method could not find the fight button.
+    """
+    pass

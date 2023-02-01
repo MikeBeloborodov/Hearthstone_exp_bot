@@ -51,7 +51,8 @@ from .utils import (
 from .exceptions import (
     MaxTriesReached, 
     MissingAbilityButton,
-    MissingEnemyButton
+    MissingEnemyButton,
+    MissingFightButton
 )
 from .telegram_bot import TelegramBot
 
@@ -298,23 +299,14 @@ class HearthstoneBot:
         while not win:
             for counter in range(0,3):
 
-                # Press hero ability button
-                try:
-                    if self.search_multiple_targets(
-                        [ABILITY_ICON, ABILITY_ICON_2, ABILITY_ICON_3],
-                    ):
-                        self.click_on_target()
-                    else:
-                        raise MissingAbilityButton
-                except MissingAbilityButton as error:
-                    await self.handle_exception(error, tg_bot)
-                    if not self.search_multiple_targets(
-                        [READY_BUTTON, GREEN_READY_BUTTON, FIGHT_BUTTON],
-                    ):
-                        raise MaxTriesReached
-                    else:
-                        self.click_on_target()
-                        continue
+            # Press hero ability button
+                if self.search_multiple_targets(
+                    [ABILITY_ICON, ABILITY_ICON_2, ABILITY_ICON_3],
+                    max_tries=3
+                ):
+                    self.click_on_target()
+                else:
+                    break
 
                 # Press enemy icon
                 try:
@@ -339,7 +331,17 @@ class HearthstoneBot:
                         continue
 
             # Press fight button
-            self.search_and_click_on_target(FIGHT_BUTTON)
+            try:
+                if self.search_multiple_targets(
+                    [READY_BUTTON, GREEN_READY_BUTTON, FIGHT_BUTTON],
+                ):
+                    self.click_on_target()
+                else:
+                    raise MissingFightButton
+            except MissingFightButton as error:
+                await self.handle_exception(error, tg_bot)
+                raise MaxTriesReached
+
 
             # Check if won the battle
             if self.is_target_on_screen(
@@ -493,6 +495,11 @@ class HearthstoneBot:
         elif type(error) == MissingEnemyButton:
             error_message = (
                 f'Could not find an enemy icon during the game #{self.games_counter}. '
+            )
+
+        elif type(error) == MissingFightButton:
+            error_message = (
+                f'Could not find the fight button during the game #{self.games_counter}. '
             )
 
         await tg_bot.send_message(
