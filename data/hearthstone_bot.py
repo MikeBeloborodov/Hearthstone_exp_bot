@@ -485,13 +485,11 @@ class HearthstoneBot:
         elif error == MissingAbilityButton:
             error_message = (
                 f'Could not find an ability button during the game #{self.games_counter}. '
-                f'Crash #{self.crashes_counter}.'
             )
 
         elif error == MissingEnemyButton:
             error_message = (
                 f'Could not find an enemy icon during the game #{self.games_counter}. '
-                f'Crash #{self.crashes_counter}.'
             )
 
         await tg_bot.send_message(
