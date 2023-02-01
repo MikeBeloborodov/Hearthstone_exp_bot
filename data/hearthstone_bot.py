@@ -385,7 +385,7 @@ class HearthstoneBot:
 
         self.search_and_click_on_target(RETIRE_CONFIRM_BUTTON)
 
-        time.sleep(3)
+        time.sleep(5)
         self.search_and_click_on_target(BATTLE_SPOILS_ICON)
 
 
