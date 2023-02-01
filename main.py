@@ -96,7 +96,7 @@ async def main():
 
         except MaxTriesReached as error:
 
-            crashes_counter += 1
+            hs_bot.crashes_counter += 1
 
             await hs_bot.handle_exception(
                 error=error,
