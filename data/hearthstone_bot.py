@@ -158,6 +158,7 @@ class HearthstoneBot:
         """
 
         pyautogui.click(self.target_x, self.target_y)
+        pyautogui.moveTo(0, 0)
 
 
     def search_and_click_on_target(
@@ -325,7 +326,6 @@ class HearthstoneBot:
                         confidence_treshold=ENEMY_CONFIDENCE_TRESHOLD,
                     ):
                         self.click_on_target()
-                        pyautogui.move(0, -200)
                     else:
                         raise MissingEnemyButton
                 except MissingEnemyButton as error:
@@ -479,18 +479,18 @@ class HearthstoneBot:
 
         screenshot_path = self.save_screenshot(folder='errors')
 
-        if error == MaxTriesReached:
+        if type(error) == MaxTriesReached:
             error_message = (
                 f'Max search tries reached during the game #{self.games_counter}. '
                 f'Crash #{self.crashes_counter}.'
             )
 
-        elif error == MissingAbilityButton:
+        elif type(error) == MissingAbilityButton:
             error_message = (
                 f'Could not find an ability button during the game #{self.games_counter}. '
             )
 
-        elif error == MissingEnemyButton:
+        elif type(error) == MissingEnemyButton:
             error_message = (
                 f'Could not find an enemy icon during the game #{self.games_counter}. '
             )
@@ -502,4 +502,5 @@ class HearthstoneBot:
             document_path=screenshot_path
         )
 
+        print(error_message)
         print(error)

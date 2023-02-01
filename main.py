@@ -71,7 +71,8 @@ async def main():
                     READY_BUTTON, GREEN_READY_BUTTON, FIGHT_BUTTON],
                     max_tries=10
                 ):
-                # Send pre battle announcements
+
+                    # Send pre battle announcements
                     announcement = f'Waiting cycle is finished.'
                     hs_bot.show_desktop_notification(message=announcement)
                     if args.tg_notification:
