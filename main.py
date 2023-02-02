@@ -9,6 +9,7 @@ from data.utils import (
     MAX_CRASHES_TRESHOLD,
     T_AFTER_CRASH,
     BATTLE_NET_PLAY_BUTTON,
+    BATTLE_NET_CONFIDENCE_TRESHOLD,
     READY_BUTTON,
     GREEN_READY_BUTTON,
     FIGHT_BUTTON,
@@ -63,7 +64,11 @@ async def main():
 
             else:
                 hs_bot.current_window = 'Battle.net'
-                hs_bot.search_and_click_on_target(BATTLE_NET_PLAY_BUTTON)
+                hs_bot.search_and_click_on_target(
+                    BATTLE_NET_PLAY_BUTTON,
+                    confidence_treshold=BATTLE_NET_CONFIDENCE_TRESHOLD
+                )
+
                 hs_bot.current_window = 'Hearthstone'
 
                 if hs_bot.search_multiple_targets(
