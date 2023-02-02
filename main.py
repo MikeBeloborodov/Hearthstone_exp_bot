@@ -63,6 +63,9 @@ async def main():
                 await hs_bot.wait()
 
             else:
+
+                # This is bugged now
+                """
                 hs_bot.current_window = 'Battle.net'
                 hs_bot.search_and_click_on_target(
                     BATTLE_NET_PLAY_BUTTON,
@@ -70,6 +73,7 @@ async def main():
                 )
 
                 hs_bot.current_window = 'Hearthstone'
+                """
 
                 if hs_bot.search_multiple_targets(
                     [ABILITY_ICON, ABILITY_ICON_2, ABILITY_ICON_3,

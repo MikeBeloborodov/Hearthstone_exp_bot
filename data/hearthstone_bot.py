@@ -423,8 +423,11 @@ class HearthstoneBot:
 
         self.start_key_capture_thread()
 
+        # This is bugged for now
+        """
         # Close Hearthstone application
         os.system("taskkill /im Hearthstone.exe")
+        """
 
         countdown = T_BETWEEN_CYCLES
         while countdown != 0 and self.continue_waiting:
