@@ -111,10 +111,14 @@ async def main():
                 tg_bot=tg_bot
             )
 
+            raise
+            # Bugged for now
+            """
             # Close Hearthstone application
             os.system("taskkill /im Hearthstone.exe")
             args.pre_run_menu = False
             time.sleep(T_AFTER_CRASH)
+            """
 
 
 if __name__ == "__main__":

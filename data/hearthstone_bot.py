@@ -358,13 +358,18 @@ class HearthstoneBot:
         Click trough all the prizes and menus.
         """
 
-        while not self.is_target_on_screen(
+        counter = 0
+        while counter < 20 and not self.is_target_on_screen(
             TREASURE_ITEM_ICON,
             max_tries=1,
             confidence_treshold=TREASURE_ITEM_CONFIDENCE_TRESHOLD
         ):
+            counter += 1
             self.click_on_target()
             time.sleep(0.5)
+
+        if counter >= 20:
+            raise MaxTriesReached
 
         self.click_on_target()
 
