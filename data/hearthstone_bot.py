@@ -367,8 +367,8 @@ class HearthstoneBot:
         """
 
         # Click trought daily quests and such
-        for i in range (0, 3):
-            time.sleep(0.5)
+        for i in range (0, 4):
+            time.sleep(2)
             self.click_on_target()
 
         self.search_and_click_on_target(VIEW_PARTY_BUTTON)
