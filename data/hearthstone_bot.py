@@ -156,7 +156,7 @@ class HearthstoneBot:
         """
 
         pyautogui.click(self.target_x, self.target_y)
-        pyautogui.moveTo(10, 10)
+        pyautogui.moveTo(100, 100)
 
 
     def search_and_click_on_target(
