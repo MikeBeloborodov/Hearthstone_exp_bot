@@ -34,14 +34,11 @@ from .utils import (
     TREASURE_ITEM_ICON,
     TREASURE_ITEM_CONFIDENCE_TRESHOLD,
     TAKE_TREASURE_BUTTON,
-    YOUR_QUESTS_ICON,
-    YOUR_WEEKLY_QUESTS,
     VIEW_PARTY_BUTTON,
     RETIRE_BUTTON,
     RETIRE_CONFIRM_BUTTON,
     BATTLE_SPOILS_ICON,
     ENEMY_CONFIDENCE_TRESHOLD,
-    CLOSE_BUNDLE,
     LEFT_ARROW,
     QUILBOAR_LOCATION,
     READY_BUTTON,
@@ -139,7 +136,7 @@ class HearthstoneBot:
         """
 
         for attempt in range(0, max_tries):
-            time.sleep(2)
+            time.sleep(2.5)
             target_x, target_y, max_value = self.get_target_values(
                 target_img_path=target_img_path,
             )
@@ -238,18 +235,6 @@ class HearthstoneBot:
         """
         Use this method to navigate to the mercenaries mode.
         """
-
-        # Closes shop bundles 
-        if self.is_target_on_screen(CLOSE_BUNDLE, max_tries=3):
-            self.click_on_target()
-
-        # Closes daily quests
-        if self.is_target_on_screen(YOUR_QUESTS_ICON, max_tries=3):
-            self.click_on_target()
-
-        # Closes weekly quests
-        if self.is_target_on_screen(YOUR_WEEKLY_QUESTS, max_tries=3):
-            self.click_on_target()
 
         self.search_and_click_on_target(MERCS_BUTTON)
 
@@ -375,14 +360,16 @@ class HearthstoneBot:
 
         self.search_and_click_on_target(TAKE_TREASURE_BUTTON)
 
-        if self.is_target_on_screen(YOUR_QUESTS_ICON, max_tries=2):
-            self.click_on_target()
-
     
     def retire_party(self) -> None:
         """
         Use this method to retire party from the run.
         """
+
+        # Click trought daily quests and such
+        for i in range (0, 3):
+            time.sleep(0.5)
+            self.click_on_target()
 
         self.search_and_click_on_target(VIEW_PARTY_BUTTON)
 
