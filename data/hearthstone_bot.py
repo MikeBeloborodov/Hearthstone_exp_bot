@@ -261,7 +261,11 @@ class HearthstoneBot:
 
         self.search_and_click_on_target(LOCATION_CHOICE_BUTTON)
 
-        self.search_and_click_on_target(PARTY_CHOICE_BUTTON)
+        # Custom confidence, sometimes it lags for some reason...
+        self.search_and_click_on_target(
+            PARTY_CHOICE_BUTTON, 
+            confidence_treshold=0.5
+        )
         time.sleep(1)
 
         if self.is_target_on_screen(LOCK_PARTY_BUTTON, max_tries=1):
