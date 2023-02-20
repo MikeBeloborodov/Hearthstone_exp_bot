@@ -164,6 +164,7 @@ class HearthstoneBot:
             mouse_y (int): Move mouse to pos y.
         """
 
+        time.sleep(0.5)
         pyautogui.click(self.target_x, self.target_y)
         pyautogui.moveTo(mouse_x, mouse_y)
 
