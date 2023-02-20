@@ -31,6 +31,12 @@ MAX_VICTORY_SEARCH = 25
 # Max crashes before program stops
 MAX_CRASHES_TRESHOLD = 10
 
+"""
+Monitor height and width values
+"""
+MONITOR_WIDTH = GetSystemMetrics(0)
+MONITOR_HEIGHT = GetSystemMetrics(1)
+
 
 """
 Paths to target images
