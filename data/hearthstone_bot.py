@@ -150,13 +150,17 @@ class HearthstoneBot:
         return False
 
 
-    def click_on_target(self) -> None:
+    def click_on_target(self, move_mouse=True) -> None:
         """
         Use this method to click on target with stored x and y values.
+
+        Args:
+            move_mouse (bool): If true moves mouse to the edge of the screen
         """
 
         pyautogui.click(self.target_x, self.target_y)
-        pyautogui.moveTo(100, 100)
+        if move_mouse:
+            pyautogui.moveTo(100, 100)
 
 
     def search_and_click_on_target(
@@ -293,7 +297,7 @@ class HearthstoneBot:
                     [ABILITY_ICON, ABILITY_ICON_2, ABILITY_ICON_3],
                     max_tries=3
                 ):
-                    self.click_on_target()
+                    self.click_on_target(move_mouse=False)
                 else:
                     break
 
@@ -306,7 +310,7 @@ class HearthstoneBot:
                         ],
                         confidence_treshold=ENEMY_CONFIDENCE_TRESHOLD,
                     ):
-                        self.click_on_target()
+                        self.click_on_target(move_mouse=False)
                     else:
                         raise MissingEnemyButton
                 except MissingEnemyButton as error:
@@ -316,7 +320,7 @@ class HearthstoneBot:
                     ):
                         raise MaxTriesReached
                     else:
-                        self.click_on_target()
+                        self.click_on_target(move_mouse=False)
                         continue
 
             # Press fight button
@@ -324,7 +328,7 @@ class HearthstoneBot:
                 if self.search_multiple_targets(
                     [READY_BUTTON, GREEN_READY_BUTTON, FIGHT_BUTTON],
                 ):
-                    self.click_on_target()
+                    self.click_on_target(move_mouse=False)
                 else:
                     raise MissingFightButton
             except MissingFightButton as error:
