@@ -151,7 +151,11 @@ class HearthstoneBot:
         return False
 
 
-    def click_on_target(self, mouse_x=100, mouse_y=MONITOR_HEIGHT-100) -> None:
+    def click_on_target(
+        self, 
+        mouse_x=100, 
+        mouse_y=MONITOR_HEIGHT - 100
+    ) -> None:
         """
         Use this method to click on target with stored x and y values.
 
